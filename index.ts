@@ -1,1 +1,2 @@
-export * as commonUtils from "@utils";
+export * from "./src/utils";
+export * from "./src/consts";

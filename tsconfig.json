@@ -14,9 +14,8 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "paths": {
-      "@*": ["./src/*.ts", "./src/*.tsx"]
-    }
+    "outDir": "dist",
+    "declaration": true
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
