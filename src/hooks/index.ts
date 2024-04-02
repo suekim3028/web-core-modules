@@ -1,3 +1,2 @@
-import { useAsyncEffect } from "./useAsyncEffect";
-
-export { useAsyncEffect };
+export * from "./useAsyncEffect";
+export * from "./useTimer";
