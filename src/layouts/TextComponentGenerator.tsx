@@ -22,7 +22,11 @@ export const TextComponentGenerator =
     }
   ) => {
     return (
-      <TextComponent {...props} {...factory[props.type]}>
+      <TextComponent
+        {...props}
+        {...factory[props.type]}
+        whiteSpace={"pre-line"}
+      >
         {props.children}
       </TextComponent>
     );
