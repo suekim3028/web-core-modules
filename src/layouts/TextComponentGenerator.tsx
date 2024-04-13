@@ -25,7 +25,8 @@ export const TextComponentGenerator =
   (
     props: TextProps & {
       type: V;
-      color?: S | string;
+      color?: S;
+      colorRgb?: string;
     }
   ) => {
     return (
@@ -36,7 +37,7 @@ export const TextComponentGenerator =
         color={
           props.color && props.color in colorGenerator
             ? colorGenerator[props.color]
-            : props.color
+            : props.color || props.colorRgb
         }
       >
         {props.children}
