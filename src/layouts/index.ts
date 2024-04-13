@@ -5,6 +5,7 @@ import type {
   TextComponentFactoryProps,
 } from "./TextComponentGenerator";
 import type { FlexProps } from "@chakra-ui/react";
+import type { SpaceProps } from "@chakra-ui/react";
 
 export {
   Flex,
@@ -12,4 +13,5 @@ export {
   TextComponentFactory,
   TextComponentFactoryProps,
   FlexProps,
+  SpaceProps,
 };

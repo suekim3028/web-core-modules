@@ -12,13 +12,20 @@ export type TextComponentFactory<T extends string> = Record<
 export const TextComponentGenerator =
   <
     T extends TextComponentFactory<any>,
-    V extends T extends TextComponentFactory<infer K> ? K : string
-  >(
-    factory: T
-  ) =>
+    V extends T extends TextComponentFactory<infer K> ? K : string,
+    U extends Record<string, string>,
+    S extends U extends Record<infer V, string> ? V : string
+  >({
+    factory,
+    colorGenerator,
+  }: {
+    factory: T;
+    colorGenerator: U;
+  }) =>
   (
     props: TextProps & {
       type: V;
+      color?: S | string;
     }
   ) => {
     return (
@@ -26,6 +33,11 @@ export const TextComponentGenerator =
         {...props}
         {...factory[props.type]}
         whiteSpace={"pre-line"}
+        color={
+          props.color && props.color in colorGenerator
+            ? colorGenerator[props.color]
+            : props.color
+        }
       >
         {props.children}
       </TextComponent>
