@@ -12,7 +12,7 @@ type InterceptedInternalRequestConfig<T> = InternalAxiosRequestConfig<T> & {
   requestAt: Date;
 };
 
-class APIClass implements APIInstance {
+class APIClass implements IApi {
   private instance: AxiosInstance | null = null;
   private showLogOnResponse = false;
   private headers: Partial<AxiosRequestHeaders> = {};
@@ -106,19 +106,19 @@ class APIClass implements APIInstance {
     return onInstance(this.instance);
   };
 
-  public get: APIInstance["get"] = (...props) =>
+  public get: IApi["get"] = (...props) =>
     this.handleNoInstance((i) => i.get(...props));
 
-  public post: APIInstance["post"] = (...props) =>
+  public post: IApi["post"] = (...props) =>
     this.handleNoInstance((i) => i.post(...props));
 
-  public patch: APIInstance["patch"] = (...props) =>
+  public patch: IApi["patch"] = (...props) =>
     this.handleNoInstance((i) => i.patch(...props));
 
-  public delete: APIInstance["delete"] = (...props) =>
+  public delete: IApi["delete"] = (...props) =>
     this.handleNoInstance((i) => i.delete(...props));
 
-  public put: APIInstance["put"] = (...props) =>
+  public put: IApi["put"] = (...props) =>
     this.handleNoInstance((i) => i.put(...props));
 
   public a() {
@@ -139,6 +139,6 @@ type DataExtractedRequests = {
   [r in keyof AxiosRequests]: ExtractData<AxiosRequests[r]>;
 };
 
-export interface APIInstance extends DataExtractedRequests {}
+export interface IApi extends DataExtractedRequests {}
 
 export default new APIClass();
