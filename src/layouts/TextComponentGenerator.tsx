@@ -22,22 +22,25 @@ export const TextComponentGenerator =
     factory: T;
     colorGenerator: U;
   }) =>
-  (
-    props: TextProps & {
-      type: V;
-      color?: S;
-      colorRgb?: string;
-    }
-  ) => {
+  ({
+    type,
+    color,
+    colorRgb,
+    ...props
+  }: TextProps & {
+    type: V;
+    color?: S;
+    colorRgb?: string;
+  }) => {
     return (
       <TextComponent
         {...props}
-        {...factory[props.type]}
+        {...factory[type]}
         whiteSpace={"pre-line"}
         color={
-          props.color && props.color in colorGenerator
-            ? colorGenerator[props.color]
-            : props.color || props.colorRgb
+          color && color in colorGenerator
+            ? colorGenerator[color]
+            : color || colorRgb
         }
       >
         {props.children}
