@@ -1,22 +1,81 @@
-import axios, { AxiosInstance, CreateAxiosDefaults } from "axios";
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosRequestHeaders,
+  AxiosResponse,
+  CreateAxiosDefaults,
+  InternalAxiosRequestConfig,
+} from "axios";
 const qs = require("qs");
+
+type InterceptedInternalRequestConfig<T> = InternalAxiosRequestConfig<T> & {
+  requestAt: Date;
+};
 
 class APIClass implements APIInstance {
   private instance: AxiosInstance | null = null;
-  private logRequests = false;
-  private headers: Record<string, any> = {};
+  private showLogOnResponse = false;
+  private headers: Partial<AxiosRequestHeaders> = {};
 
   constructor() {
     if (process?.env?.NODE_ENV === "development") {
-      this.logRequests = true;
+      this.showLogOnResponse = true;
     }
   }
+
+  private hasDateInRequest = (
+    config: AxiosRequestConfig
+  ): config is InterceptedInternalRequestConfig<any> => {
+    return "requestAt" in config;
+  };
+
+  private logResponse = (config: InternalAxiosRequestConfig) => {
+    if (this.showLogOnResponse && this.hasDateInRequest(config)) {
+      const timeDiffInSec = (
+        (new Date().getTime() - config.requestAt.getTime()) /
+        1000
+      ).toFixed(2);
+
+      let logText = `[${config.method?.toUpperCase()}] ${config.url}`;
+      config.params && (logText += `\t${JSON.stringify(config.params)}`);
+      logText += `\t${timeDiffInSec}s`;
+      console.log(logText);
+    }
+  };
+
+  private requestInterceptor(
+    config: InternalAxiosRequestConfig<any>
+  ): InterceptedInternalRequestConfig<any> {
+    return {
+      ...config,
+      requestAt: new Date(),
+      headers: {
+        ...config.headers,
+        ...this.headers,
+      } as AxiosRequestHeaders,
+    };
+  }
+
+  private responseInterceptor = {
+    onFulfilled: <T>({ config, data, headers }: AxiosResponse<T>) => {
+      this.logResponse(config);
+      return data;
+    },
+    onRejected: ({ response }: { response: AxiosResponse }) => {
+      return Promise.reject(); // TODO: error handling
+    },
+  };
 
   public init(config?: CreateAxiosDefaults) {
     this.instance = axios.create({
       ...config,
       paramsSerializer: (p) => qs.stringify(p, { indices: false }),
     });
+    this.instance.interceptors.request.use(this.requestInterceptor.bind(this));
+    this.instance.interceptors.response.use(
+      this.responseInterceptor.onFulfilled.bind(this),
+      this.responseInterceptor.onRejected.bind(this)
+    );
   }
 
   public setHeaders(headers: Record<string, any>) {
@@ -39,35 +98,47 @@ class APIClass implements APIInstance {
     this.headers["App-Version"] = version;
   }
 
-  public get: APIInstance["get"] = (...props) => {
+  private handleNoInstance = <T>(
+    onInstance: (instance: AxiosInstance) => T
+  ): T => {
     if (this.instance === null)
       throw new Error("API Instance must be initialized before use");
-    return this.instance.get(...props);
+    return onInstance(this.instance);
   };
 
-  public post: APIInstance["post"] = (...props) => {
-    if (this.instance === null)
-      throw new Error("API Instance must be initialized before use");
-    return this.instance.post(...props);
-  };
-  public patch: APIInstance["patch"] = (...props) => {
-    if (this.instance === null)
-      throw new Error("API Instance must be initialized before use");
-    return this.instance.patch(...props);
-  };
-  public delete: APIInstance["delete"] = (...props) => {
-    if (this.instance === null)
-      throw new Error("API Instance must be initialized before use");
-    return this.instance.delete(...props);
-  };
-  public put: APIInstance["put"] = (...props) => {
-    if (this.instance === null)
-      throw new Error("API Instance must be initialized before use");
-    return this.instance.put(...props);
-  };
+  public get: APIInstance["get"] = (...props) =>
+    this.handleNoInstance((i) => i.get(...props));
+
+  public post: APIInstance["post"] = (...props) =>
+    this.handleNoInstance((i) => i.post(...props));
+
+  public patch: APIInstance["patch"] = (...props) =>
+    this.handleNoInstance((i) => i.patch(...props));
+
+  public delete: APIInstance["delete"] = (...props) =>
+    this.handleNoInstance((i) => i.delete(...props));
+
+  public put: APIInstance["put"] = (...props) =>
+    this.handleNoInstance((i) => i.put(...props));
+
+  public a() {
+    const a = this.get<string>("");
+  }
 }
 
-export interface APIInstance
-  extends Pick<AxiosInstance, "get" | "put" | "post" | "delete" | "patch"> {}
+type AxiosRequests = Pick<
+  AxiosInstance,
+  "get" | "put" | "post" | "delete" | "patch"
+>;
+
+type ExtractData<
+  Request extends <T = any, R = AxiosResponse<T>>(...params: any) => Promise<R>
+> = <T>(...params: Parameters<Request>) => Promise<T>;
+
+type DataExtractedRequests = {
+  [r in keyof AxiosRequests]: ExtractData<AxiosRequests[r]>;
+};
+
+export interface APIInstance extends DataExtractedRequests {}
 
 export default new APIClass();
