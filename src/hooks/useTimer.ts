@@ -1,13 +1,19 @@
 "use client";
-import { useEffect } from "react";
+
+import { useEffect, useRef } from "react";
 import { interval, take } from "rxjs";
 
 export const useSecondEffect = (
   seconds: number,
   effect: (times: number) => void
 ) => {
+  const started = useRef(false);
   useEffect(() => {
-    const numbers = interval(1000);
-    numbers.pipe(take(seconds)).subscribe(effect);
+    if (!started.current) {
+      started.current = true;
+
+      const numbers = interval(1000);
+      numbers.pipe(take(seconds)).subscribe(effect);
+    }
   }, []);
 };
