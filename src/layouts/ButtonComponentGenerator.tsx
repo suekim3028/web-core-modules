@@ -4,22 +4,23 @@ import { L } from "../..";
 
 type ButtonSize = "XS" | "S" | "M" | "L" | "XL";
 
-type ReadOnlyProperties = {
-  readonly fontType: string;
-  readonly buttonType: string;
-  readonly iconNames: string;
+export type ReadOnlyProperties = {
+  fontTypes: Readonly<string[]>;
+  buttonTypes: Readonly<string[]>;
+  iconNames: Readonly<string[]>;
+  colorSettings: Readonly<Record<string, string>>;
 };
 
 /**
  * settings that differ by size
  */
 
-export type ButtonSizeSetting<T extends ReadOnlyProperties> = Record<
+type ButtonSizeSetting<T extends ReadOnlyProperties> = Record<
   ButtonSize,
   {
     py: number;
     px: number;
-    fontType: T["fontType"];
+    fontType: T["fontTypes"][number];
     iconSize: number;
     iconMr: number;
   }
@@ -29,11 +30,11 @@ export type ButtonSizeSetting<T extends ReadOnlyProperties> = Record<
  * settings that differ by type
  */
 
-export type ButtonTypeSetting<
+type ButtonTypeSetting<
   T extends ReadOnlyProperties,
   ColorKeys extends string | number | symbol
 > = Record<
-  T["buttonType"],
+  T["buttonTypes"][number],
   {
     backgroundStart: string;
     backgroundEnd: string;
@@ -50,18 +51,20 @@ const ButtonComponentGenerator =
   <
     T extends ReadOnlyProperties,
     ColorSetting extends { [key: string]: string },
-    GeneratorProps extends ButtonGeneratorProps<T, ColorSetting>
+    GeneratorProps extends ButtonGeneratorProps<T>
   >(
-    sizeSettings: GeneratorProps["sizeSettings"],
-    typeSettings: GeneratorProps["typeSettings"],
-    colorSettings: GeneratorProps["colorSettings"],
-    defaultSettings: GeneratorProps["defaultSettings"],
-    renderIcon: GeneratorProps["renderIcon"],
-    renderText: GeneratorProps["renderText"]
+    { buttonTypes, fontTypes, iconNames, colorSettings }: T,
+    {
+      sizeSettings,
+      typeSettings,
+      defaultSettings,
+      renderIcon,
+      renderText,
+    }: GeneratorProps
   ) =>
-  (buttonProps: ButtonProps<T, keyof ColorSetting>) => {
+  (buttonProps: ButtonProps<T>) => {
     const { href, openInNewTab } = buttonProps;
-    const generatorProps: ButtonGeneratorProps<T, ColorSetting> = {
+    const generatorProps: ButtonGeneratorProps<T> = {
       sizeSettings,
       typeSettings,
       colorSettings,
@@ -70,7 +73,14 @@ const ButtonComponentGenerator =
       renderText,
     };
 
-    if (!href) return <ButtonComponent {...buttonProps} {...generatorProps} />;
+    if (!href)
+      return (
+        <ButtonComponent
+          {...buttonProps}
+          {...generatorProps}
+          colorSettings={colorSettings}
+        />
+      );
 
     return (
       <Link
@@ -104,8 +114,7 @@ const ButtonComponent = <
   renderIcon,
   renderText,
   ...props
-}: ButtonProps<T, keyof ColorSetting> &
-  ButtonGeneratorProps<T, ColorSetting>) => {
+}: ButtonProps<T> & ButtonGeneratorProps<T>) => {
   const sizeSetting = sizeSettings[size];
   const typeSetting = typeSettings[type];
 
@@ -144,34 +153,32 @@ const ButtonComponent = <
       onClick={disabled ? undefined : onClick}
       {...props}
     >
-      {!!icon && renderIcon(icon, iconSize)}
-      {renderText(
-        fontType,
-        disabled && disabledTextColor
-          ? disabledTextColor
-          : textColor || themeTextColor,
-        title,
-        textRgbColor
-      )}
+      {!!icon && renderIcon({ name: icon, size: iconSize })}
+      {renderText({
+        type: fontType,
+        color:
+          disabled && disabledTextColor
+            ? disabledTextColor
+            : textColor || themeTextColor,
+        title: title,
+        colorRgb: textRgbColor,
+      })}
     </Flex>
   );
 };
 
-type ButtonProps<
-  T extends ReadOnlyProperties,
-  ColorKeys extends string | number | symbol
-> = {
+type ButtonProps<T extends ReadOnlyProperties> = {
   title: string;
-  type: T["buttonType"];
+  type: T["buttonTypes"][number];
   size: ButtonSize;
-  icon?: T["iconNames"];
+  icon?: T["iconNames"][number];
   stretch?: boolean;
   onClick?: () => void;
   disabled?: boolean;
 } & L.SpaceProps & {
-    bgColor?: ColorKeys;
+    bgColor?: keyof T["colorSettings"];
     bgRgbColor?: string;
-    textColor?: ColorKeys;
+    textColor?: keyof T["colorSettings"];
     textRgbColor?: string;
   } & (
     | {
@@ -184,21 +191,21 @@ type ButtonProps<
       }
   );
 
-type ButtonGeneratorProps<
-  T extends ReadOnlyProperties,
-  ColorSetting extends Record<string, string>
-> = {
+type ButtonGeneratorProps<T extends ReadOnlyProperties> = {
   sizeSettings: ButtonSizeSetting<T>;
-  typeSettings: ButtonTypeSetting<T, keyof ColorSetting>;
-  colorSettings: ColorSetting;
+  typeSettings: ButtonTypeSetting<T, keyof T["colorSettings"]>;
+  colorSettings: T["colorSettings"];
   defaultSettings: ButtonDefaultSetting;
-  renderIcon: (iconName: T["iconNames"], size: number) => JSX.Element;
-  renderText: (
-    type: T["fontType"],
-    color: keyof ColorSetting,
-    title: string,
-    textRgbColor?: string
-  ) => JSX.Element;
+  renderIcon: (props: {
+    name: T["iconNames"][number];
+    size: number;
+  }) => JSX.Element;
+  renderText: (props: {
+    type: T["fontTypes"][number];
+    color: keyof T["colorSettings"];
+    title: string;
+    colorRgb?: string;
+  }) => JSX.Element;
 };
 
 export default ButtonComponentGenerator;

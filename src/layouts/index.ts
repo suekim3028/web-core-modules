@@ -1,17 +1,22 @@
-import { TextComponentGenerator } from "./TextComponentGenerator";
 import type {
   TextComponentFactory,
   TextComponentFactoryProps,
 } from "./TextComponentGenerator";
+import { TextComponentGenerator } from "./TextComponentGenerator";
+
+import ButtonComponentGenerator from "./ButtonComponentGenerator";
+
+import type { FlexProps, SpaceProps } from "@chakra-ui/react";
+import type { ReadOnlyProperties } from "./ButtonComponentGenerator";
 import FlexComponentGenerator from "./FlexComponentGenerator";
-import type { FlexProps } from "@chakra-ui/react";
-import type { SpaceProps } from "@chakra-ui/react";
 
 export {
-  TextComponentGenerator,
+  ButtonComponentGenerator,
+  FlexComponentGenerator,
+  FlexProps,
+  ReadOnlyProperties,
+  SpaceProps,
   TextComponentFactory,
   TextComponentFactoryProps,
-  FlexProps,
-  SpaceProps,
-  FlexComponentGenerator,
+  TextComponentGenerator,
 };
