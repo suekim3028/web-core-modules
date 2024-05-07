@@ -1,6 +1,5 @@
-import { Flex } from "@chakra-ui/react";
+import { Flex, SpaceProps } from "@chakra-ui/react";
 import Link from "next/link";
-import { L } from "../..";
 
 type ButtonSize = "XS" | "S" | "M" | "L" | "XL";
 
@@ -45,15 +44,14 @@ type ButtonTypeSetting<
   }
 >;
 
-type ButtonDefaultSetting = { borderRadius: number };
+type ButtonDefaultSetting = { borderRadius: number; defaultSize: ButtonSize };
 
 const ButtonComponentGenerator =
   <
     T extends ReadOnlyProperties,
-    ColorSetting extends { [key: string]: string },
     GeneratorProps extends ButtonGeneratorProps<T>
   >(
-    { buttonTypes, fontTypes, iconNames, colorSettings }: T,
+    { colorSettings }: T,
     {
       sizeSettings,
       typeSettings,
@@ -62,8 +60,9 @@ const ButtonComponentGenerator =
       renderText,
     }: GeneratorProps
   ) =>
-  (buttonProps: ButtonProps<T>) => {
-    const { href, openInNewTab } = buttonProps;
+  (_buttonProps: ButtonProps<T>) => {
+    const { openInNewTab, ...buttonProps } = _buttonProps;
+    const { href } = buttonProps;
     const generatorProps: ButtonGeneratorProps<T> = {
       sizeSettings,
       typeSettings,
@@ -75,11 +74,7 @@ const ButtonComponentGenerator =
 
     if (!href)
       return (
-        <ButtonComponent
-          {...buttonProps}
-          {...generatorProps}
-          colorSettings={colorSettings}
-        />
+        <ButtonComponent {...buttonProps} generatorProps={generatorProps} />
       );
 
     return (
@@ -88,7 +83,7 @@ const ButtonComponentGenerator =
         style={{ width: buttonProps.stretch ? "100%" : "fit-content" }}
         target={openInNewTab ? "_blank" : undefined}
       >
-        <ButtonComponent {...buttonProps} {...generatorProps} />
+        <ButtonComponent {...buttonProps} generatorProps={generatorProps} />
       </Link>
     );
   };
@@ -99,7 +94,7 @@ const ButtonComponent = <
 >({
   title,
   type,
-  size,
+  size: _size,
   icon,
   stretch,
   bgColor,
@@ -108,14 +103,20 @@ const ButtonComponent = <
   textColor,
   disabled,
   onClick,
-  sizeSettings,
-  typeSettings,
-  colorSettings,
-  renderIcon,
-  renderText,
+  generatorProps: {
+    sizeSettings,
+    typeSettings,
+    colorSettings,
+    renderIcon,
+    renderText,
+    defaultSettings,
+  },
+
   ...props
-}: ButtonProps<T> & ButtonGeneratorProps<T>) => {
+}: ButtonProps<T> & { generatorProps: ButtonGeneratorProps<T> }) => {
+  const size = _size || defaultSettings.defaultSize;
   const sizeSetting = sizeSettings[size];
+
   const typeSetting = typeSettings[type];
 
   const {
@@ -170,12 +171,12 @@ const ButtonComponent = <
 type ButtonProps<T extends ReadOnlyProperties> = {
   title: string;
   type: T["buttonTypes"][number];
-  size: ButtonSize;
+  size?: ButtonSize;
   icon?: T["iconNames"][number];
   stretch?: boolean;
   onClick?: () => void;
   disabled?: boolean;
-} & L.SpaceProps & {
+} & SpaceProps & {
     bgColor?: keyof T["colorSettings"];
     bgRgbColor?: string;
     textColor?: keyof T["colorSettings"];
