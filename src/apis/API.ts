@@ -76,6 +76,9 @@ class APIClass implements IApi {
       this.responseInterceptor.onFulfilled.bind(this),
       this.responseInterceptor.onRejected.bind(this)
     );
+    console.log(
+      `[API] 👊 API instance is initiated with base URL : ${config?.baseURL}`
+    );
   }
 
   public setHeaders(headers: Record<string, any>) {
