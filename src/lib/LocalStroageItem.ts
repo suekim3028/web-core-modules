@@ -1,4 +1,4 @@
-export class LocalStorageItem<T extends object> {
+export class LocalStorageItem<T> {
   private key: string;
 
   constructor(key: string) {
@@ -8,15 +8,25 @@ export class LocalStorageItem<T extends object> {
   public get() {
     const item = localStorage.getItem(this.key);
     if (!item) return null;
-    const parsedItem = JSON.parse(item);
-    if (typeof parsedItem != "object") return null;
-    return parsedItem as Partial<T>;
+
+    try {
+      const parsedItem = JSON.parse(item);
+
+      return parsedItem as Partial<T>;
+    } catch {
+      this.remove();
+      return null;
+    }
   }
 
   public set(data: Partial<T>) {
-    const item = this.get();
-    const updated = item ? { ...item, ...data } : data;
-    localStorage.setItem(this.key, JSON.stringify(data));
+    if (!data) return;
+
+    try {
+      localStorage.setItem(this.key, JSON.stringify(data));
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   public remove() {
