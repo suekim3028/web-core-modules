@@ -1,3 +1,3 @@
-import API from "./API";
+import APIConstructor from "./APIConstructor";
 
-export { API };
+export { APIConstructor };

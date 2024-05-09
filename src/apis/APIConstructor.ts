@@ -12,7 +12,7 @@ type InterceptedInternalRequestConfig<T> = InternalAxiosRequestConfig<T> & {
   requestAt: Date;
 };
 
-class APIClass implements IApi {
+class APIConstructor implements IApi {
   private instance: AxiosInstance | null = null;
   private showLogOnResponse = false;
   private headers: Partial<AxiosRequestHeaders> = {};
@@ -123,10 +123,6 @@ class APIClass implements IApi {
 
   public put: IApi["put"] = (...props) =>
     this.handleNoInstance((i) => i.put(...props));
-
-  public a() {
-    const a = this.get<string>("");
-  }
 }
 
 type AxiosRequests = Pick<
@@ -144,4 +140,4 @@ type DataExtractedRequests = {
 
 export interface IApi extends DataExtractedRequests {}
 
-export default new APIClass();
+export default new APIConstructor();
