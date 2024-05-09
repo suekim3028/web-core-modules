@@ -42,7 +42,9 @@ export const returnFetch = <ErrorData>({
 
     try {
       console.log(
-        `[${method}] ${finalUrl} ${options?.dummyData ? "WITH DUMMY DATA" : ""}`
+        `[${method}] ${finalUrl} ${JSON.stringify(config?.body || "")} ${
+          options?.dummyData ? "WITH DUMMY DATA" : ""
+        }`
       );
 
       if (options?.dummyData)
@@ -50,6 +52,10 @@ export const returnFetch = <ErrorData>({
       const res = await fetch(finalUrl, configData);
 
       const data = await res.json();
+
+      if ("code" in data && "message" in data && "value" in data) {
+        throw new Error(data.message);
+      }
 
       return { data: data as T, isError: false };
     } catch (e) {

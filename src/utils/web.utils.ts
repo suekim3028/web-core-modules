@@ -23,3 +23,6 @@ const copyToClipboardWithoutNavigator = (
   document.body.removeChild(el);
   onSuccess();
 };
+
+export const isServerSide = () =>
+  typeof window === "undefined" || typeof document === "undefined";
