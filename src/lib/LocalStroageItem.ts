@@ -16,6 +16,10 @@ export class LocalStorageItem<T extends object> {
   public set(data: Partial<T>) {
     const item = this.get();
     const updated = item ? { ...item, ...data } : data;
-    localStorage.setItem(this.key, JSON.stringify(updated));
+    localStorage.setItem(this.key, JSON.stringify(data));
+  }
+
+  public remove() {
+    localStorage.removeItem(this.key);
   }
 }
