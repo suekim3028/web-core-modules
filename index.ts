@@ -5,3 +5,4 @@ export * as L from "./src/layouts";
 export * from "./src/lib";
 
 export * from "./src/apis";
+export * from "./src/components";

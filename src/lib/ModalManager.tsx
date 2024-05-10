@@ -5,11 +5,11 @@ class _ModalManager {
   private isOn: boolean = false;
   private closeEvent: boolean = false;
 
-  private componentEvent$ = new Subject<JSX.Element>();
+  private componentEvent$ = new Subject<JSX.Element | null>();
   private closeEvent$ = new Subject<boolean>();
 
   public addListener = (
-    onShow: (Component: JSX.Element) => void,
+    onShow: (Component: JSX.Element | null) => void,
     onClose: () => void
   ) => {
     const showSub = this.componentEvent$.subscribe(onShow);
@@ -32,6 +32,8 @@ class _ModalManager {
 
   public closeAfterAnim = () => {
     this.isOn = false;
+    this.componentEvent$.next(null);
+
     const shifted = this.componentQueue.shift();
     if (shifted) {
       this.isOn = true;
