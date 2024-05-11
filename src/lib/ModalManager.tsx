@@ -3,6 +3,7 @@ import { Subject } from "rxjs";
 export type ModalItem = {
   Component: JSX.Element;
   closeOnDim: boolean;
+  position?: "bottom" | "center";
 };
 
 class _ModalManager {
