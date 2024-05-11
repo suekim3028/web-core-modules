@@ -1,14 +1,14 @@
 "use client";
 import { Flex } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import ModalManager from "../../lib/ModalManager";
+import ModalManager, { ModalItem } from "../../lib/ModalManager";
 
 const ModalWrapper = ({ children }: { children: React.ReactNode }) => {
   const { closeAfterAnim, addListener } = ModalManager;
-  const [Component, setComponent] = useState<JSX.Element | null>(null);
+  const [modalItem, setModalItem] = useState<ModalItem | null>(null);
 
-  const handleChangeComponent = (Component: JSX.Element | null) => {
-    setComponent(Component);
+  const handleChangeComponent = (value: ModalItem | null) => {
+    setModalItem(value);
   };
 
   const close = () => {
@@ -24,8 +24,9 @@ const ModalWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       {children}
-      {!!Component && (
+      {!!modalItem && (
         <Flex
+          onClick={modalItem.closeOnDim ? close : undefined}
           position={"fixed"}
           left={0}
           right={0}
@@ -36,7 +37,13 @@ const ModalWrapper = ({ children }: { children: React.ReactNode }) => {
           bgColor={"rgba(0,0,0,0.5)"}
           zIndex={10}
         >
-          {Component}
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            {modalItem.Component}
+          </div>
         </Flex>
       )}
     </>

@@ -1,15 +1,20 @@
 import { Subject } from "rxjs";
 
+export type ModalItem = {
+  Component: JSX.Element;
+  closeOnDim: boolean;
+};
+
 class _ModalManager {
-  private componentQueue: JSX.Element[] = [];
+  private componentQueue: ModalItem[] = [];
   private isOn: boolean = false;
   private closeEvent: boolean = false;
 
-  private componentEvent$ = new Subject<JSX.Element | null>();
+  private componentEvent$ = new Subject<ModalItem | null>();
   private closeEvent$ = new Subject<boolean>();
 
   public addListener = (
-    onShow: (Component: JSX.Element | null) => void,
+    onShow: (value: ModalItem | null) => void,
     onClose: () => void
   ) => {
     const showSub = this.componentEvent$.subscribe(onShow);
@@ -21,12 +26,12 @@ class _ModalManager {
     };
   };
 
-  public show = (Component: JSX.Element) => {
+  public show = (item: ModalItem) => {
     if (this.isOn) {
-      this.componentQueue.push(Component);
+      this.componentQueue.push(item);
     } else {
       this.isOn = true;
-      this.componentEvent$.next(Component);
+      this.componentEvent$.next(item);
     }
   };
 
