@@ -1,6 +1,6 @@
 "use client";
 import { Flex } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ModalManager, { ModalItem } from "../../lib/ModalManager";
 
 const ModalWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -50,4 +50,4 @@ const ModalWrapper = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default ModalWrapper;
+export default React.memo(ModalWrapper);

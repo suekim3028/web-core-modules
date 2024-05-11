@@ -45,7 +45,6 @@ export const returnFetch = <ErrorData>({
       body: config?.body ? JSON.stringify(config.body) : undefined,
     };
 
-    console.log({ configData });
     try {
       console.log(
         `[${method}] ${finalUrl} ${JSON.stringify(config?.body || "")} ${
