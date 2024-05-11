@@ -154,7 +154,11 @@ const ButtonComponent = <
       onClick={disabled ? undefined : onClick}
       {...props}
     >
-      {!!icon && renderIcon({ name: icon, size: iconSize })}
+      {!!icon && (
+        <div style={{ marginRight: iconMr }}>
+          {renderIcon({ name: icon, size: iconSize })}
+        </div>
+      )}
       {renderText({
         type: fontType,
         color:
