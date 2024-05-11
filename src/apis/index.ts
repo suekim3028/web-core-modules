@@ -24,22 +24,28 @@ export const returnFetch = <ErrorData>({
   ): Promise<{ data: T; isError: false } | { data: null; isError: true }> => {
     const [url, config, options] = params;
     const finalUrl = `${removeSlash(baseUrl)}/${removeSlash(url)}`;
-    console.log({ finalUrl });
 
     const token = await getToken();
-    console.log({ token });
 
     if (!token) console.log("[API] api call with no token");
+
+    const headers = {
+      "Content-Type": "application/json",
+      ...(token ? tokenHandler(token) : {}),
+      ...(config?.headers || {}),
+    };
+
+    if (config?.isMultipartFormData) {
+      delete (headers as any)["Content-Type"];
+    }
+
     const configData: RequestInit = {
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? tokenHandler(token) : {}),
-        ...(config?.headers || {}),
-      },
+      headers,
       method,
       body: config?.body ? JSON.stringify(config.body) : undefined,
     };
 
+    console.log({ configData });
     try {
       console.log(
         `[${method}] ${finalUrl} ${JSON.stringify(config?.body || "")} ${
@@ -49,17 +55,19 @@ export const returnFetch = <ErrorData>({
 
       if (options?.dummyData)
         return { isError: false, data: options.dummyData };
-      const res = await fetch(finalUrl, configData);
+
+      const res = await fetch(options?.dummyUrl || finalUrl, configData);
 
       const data = await res.json();
 
+      // TOOD: 이후 삭제
       if ("code" in data && "message" in data && "value" in data) {
         throw new Error(data.message);
       }
 
       return { data: data as T, isError: false };
     } catch (e) {
-      console.log("========API ERROR========");
+      console.error(e);
       const _onError = options?.onError || onError;
       _onError(options?.error || (e as ErrorData));
       return { data: null, isError: true };
@@ -87,10 +95,12 @@ type FetchParams<T, ErrorData> = [
     dummyData?: T;
     onError?: (e: ErrorData) => void;
     error?: ErrorData;
+    dummyUrl?: string;
   }
 ];
 
 type FetchConfig = {
   headers?: object;
   body?: any;
+  isMultipartFormData?: boolean;
 };
