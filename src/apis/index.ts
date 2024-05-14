@@ -23,7 +23,10 @@ export const returnFetch = <ErrorData>({
     ...params: FetchParams<T, ErrorData>
   ): Promise<{ data: T; isError: false } | { data: null; isError: true }> => {
     const [url, config, options] = params;
-    const finalUrl = `${removeSlash(baseUrl)}/${removeSlash(url)}`;
+
+    const finalUrl = options?.useFullUrl
+      ? url
+      : `${removeSlash(baseUrl)}/${removeSlash(url)}`;
 
     const token = await getToken();
 
@@ -102,6 +105,7 @@ type FetchParams<T, ErrorData> = [
     onError?: (e: ErrorData) => void;
     error?: ErrorData;
     dummyUrl?: string;
+    useFullUrl?: boolean;
   }
 ];
 
