@@ -39,17 +39,24 @@ export const returnFetch = <ErrorData>({
       delete (headers as any)["Content-Type"];
     }
 
+    const body = config?.body
+      ? config?.isMultipartFormData
+        ? config?.body
+        : JSON.stringify(config.body)
+      : undefined;
+
     const configData: RequestInit = {
       headers,
       method,
-      body: config?.body ? JSON.stringify(config.body) : undefined,
+      body,
     };
 
     try {
       console.log(
-        `[${method}] ${finalUrl} ${JSON.stringify(config?.body || "")} ${
-          options?.dummyData ? "WITH DUMMY DATA" : ""
-        }`
+        `[${method}] ${options?.dummyUrl || finalUrl} ${JSON.stringify(
+          config?.body || ""
+        )} ${options?.dummyData ? "WITH DUMMY DATA" : ""}`,
+        { configData }
       );
 
       if (options?.dummyData)
