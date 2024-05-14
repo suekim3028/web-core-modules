@@ -34,8 +34,8 @@ export const TextComponentGenerator =
   }) => {
     return (
       <TextComponent
-        {...props}
         {...factory[type]}
+        {...props}
         whiteSpace={"pre-line"}
         color={
           color && color in colorGenerator

@@ -1,3 +1,3 @@
 import ModalWrapper from "./ModalWrapper/ModalWrapper";
-
-export { ModalWrapper };
+import WindowSizeChecker from "./WindowSizeChecker/WindowSizeChecker";
+export { ModalWrapper, WindowSizeChecker };
