@@ -159,15 +159,17 @@ const ButtonComponent = <
           {renderIcon({ name: icon, size: iconSize })}
         </div>
       )}
-      {renderText({
-        type: fontType,
-        color:
-          disabled && disabledTextColor
-            ? disabledTextColor
-            : textColor || themeTextColor,
-        title: title,
-        colorRgb: textRgbColor,
-      })}
+      <Flex minH={iconSize} alignItems={"center"}>
+        {renderText({
+          type: fontType,
+          color:
+            disabled && disabledTextColor
+              ? disabledTextColor
+              : textColor || themeTextColor,
+          title: title,
+          colorRgb: textRgbColor,
+        })}
+      </Flex>
     </Flex>
   );
 };
