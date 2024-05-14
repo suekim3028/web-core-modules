@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const getSize = ({
   WINDOW_MAX_WIDTH,
@@ -17,18 +17,21 @@ const getSize = ({
   };
 };
 
-export const useWindowSize = (
-  consts: {
-    WINDOW_MAX_WIDTH: number;
-    WINDOW_MIN_WIDTH: number;
-  },
-  onWidowSizeChange: (size: { width: number; height: number }) => void
-) => {
+export const useWindowSize = (consts: {
+  WINDOW_MAX_WIDTH: number;
+  WINDOW_MIN_WIDTH: number;
+}) => {
+  const [size, setSize] = useState<{
+    width: number;
+    height: number;
+  }>();
   useEffect(() => {
-    const handleResize = () => onWidowSizeChange(getSize(consts));
+    const handleResize = () => setSize(getSize(consts));
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  return size;
 };
