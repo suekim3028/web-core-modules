@@ -67,6 +67,8 @@ export const returnFetch = <ErrorData>({
 
       const res = await fetch(options?.dummyUrl || finalUrl, configData);
 
+      if (res.status != 200) return { data: undefined as T, isError: false };
+
       const data = await res.json();
 
       // TOOD: 이후 삭제
