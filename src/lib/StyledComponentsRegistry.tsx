@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
 import { useServerInsertedHTML } from "next/navigation";
+import React, { useRef } from "react";
 import { ServerStyleSheet, StyleSheetManager } from "styled-components";
 
-export default function StyledComponentsRegistry({
+const StyledComponentsRegistry = ({
   children,
 }: {
   children: React.ReactNode;
-}) {
+}) => {
   // Only create stylesheet once with lazy initial state
   // x-ref: https://reactjs.org/docs/hooks-reference.html#lazy-initial-state
-  const [styledComponentsStyleSheet] = useState(() => new ServerStyleSheet());
+  const styledComponentsStyleSheet = useRef(new ServerStyleSheet()).current;
 
   useServerInsertedHTML(() => {
     const styles = styledComponentsStyleSheet.getStyleElement();
@@ -26,4 +26,6 @@ export default function StyledComponentsRegistry({
       {children}
     </StyleSheetManager>
   );
-}
+};
+
+export default React.memo(StyledComponentsRegistry);
