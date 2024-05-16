@@ -39,11 +39,14 @@ export const getRandomArrItem = (arr: any[]) => {
  * image resize 함수
  */
 
-export const resizeImage = (
+type ResultType = "dataURL" | "Blob";
+
+export const resizeImage = async <T extends ResultType>(
   image: HTMLImageElement,
   maxSize: number,
+  resultType: T,
   type?: string
-) => {
+): Promise<(T extends "dataURL" ? string : Blob) | null> => {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
@@ -58,7 +61,43 @@ export const resizeImage = (
 
   ctx.drawImage(image, 0, 0, width, height);
 
+  let resolver: ((blob: Blob | null) => void) | null = null;
+  const promise = new Promise((r: (blob: Blob | null) => void) => {
+    resolver = r;
+  });
+  canvas.toBlob((b) => {
+    if (resolver) resolver(b);
+  });
+
+  const blob = await promise;
   const url = canvas.toDataURL(type);
   canvas.remove();
-  return url;
+  if (resultType === "dataURL") {
+    return url as T extends "dataURL" ? string : Blob;
+  } else {
+    return blob as T extends "dataURL" ? string : Blob;
+  }
+};
+
+export const fileToImage = async (file: File) => {
+  const fileReader = new FileReader();
+
+  const tempImageElement = document.createElement("img");
+  let resolver: ((imageUrl: string) => void) | null = null;
+  const promise = new Promise((r: (imageUrl: string) => void) => {
+    resolver = r;
+  });
+  fileReader.onload = (ev) => {
+    const result = ev.target?.result;
+    if (typeof result === "string" && !!resolver) {
+      resolver(result);
+    } else {
+      throw new Error();
+    }
+  };
+
+  fileReader.readAsDataURL(file);
+  const imageUrl = await promise;
+  tempImageElement.src = imageUrl;
+  return tempImageElement;
 };
