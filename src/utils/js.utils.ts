@@ -34,3 +34,29 @@ export const getRandomArrItem = (arr: any[]) => {
   const idx = Math.floor(Math.random() * len);
   return arr[idx];
 };
+
+/**
+ * image resize 함수
+ */
+
+export const resizeImage = (
+  image: HTMLImageElement,
+  maxSize: number,
+  type?: string
+) => {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  const horizontal = image.width >= image.height;
+
+  const width = horizontal ? maxSize : maxSize * (image.width / image.height); // destination canvas size
+  const height = horizontal ? maxSize * (image.height / image.width) : maxSize; // destination canvas size
+
+  canvas.width = width;
+  canvas.height = height;
+
+  ctx.drawImage(image, 0, 0, width, height);
+
+  return canvas.toDataURL(type);
+};
