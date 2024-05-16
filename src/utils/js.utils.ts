@@ -101,3 +101,15 @@ export const fileToImage = async (file: File) => {
   tempImageElement.src = imageUrl;
   return tempImageElement;
 };
+
+export const downloadImages = (imageUrls: string[]) => {
+  const a = document.createElement("a");
+
+  imageUrls.forEach((imageUrl) => {
+    a.href = imageUrl;
+    a.download = imageUrl;
+    a.click();
+  });
+
+  a.remove();
+};
