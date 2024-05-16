@@ -58,5 +58,7 @@ export const resizeImage = (
 
   ctx.drawImage(image, 0, 0, width, height);
 
-  return canvas.toDataURL(type);
+  const url = canvas.toDataURL(type);
+  canvas.remove();
+  return url;
 };
