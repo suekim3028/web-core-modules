@@ -1,45 +1,47 @@
-const removeSlash = (url: string) => (url.startsWith("/") ? url.slice(1) : url);
+const removeSlash = (url: string) => (url.startsWith('/') ? url.slice(1) : url);
 enum Method {
-  "GET" = "GET",
-  "PUT" = "PUT",
-  "POST" = "POST",
-  "DELETE" = "DELETE",
-  "PATCH" = "PATCH",
+  'GET' = 'GET',
+  'PUT' = 'PUT',
+  'POST' = 'POST',
+  'DELETE' = 'DELETE',
+  'PATCH' = 'PATCH',
 }
 
 export const returnFetch = <ErrorData>({
   baseUrl,
-  getToken,
-  tokenHandler,
-  onError,
+  tokenHeaderFn,
+  onUnauthorizedError,
 }: {
   baseUrl: string;
-  getToken: () => Promise<string | null> | string | null;
-  tokenHandler: (token: string) => Record<string, string>;
-  onError: (error: ErrorData) => void;
+  tokenHeaderFn: () => Promise<Record<string, string> | null>;
+  onUnauthorizedError: () => Promise<void>;
 }) => {
   const fetchFn = async <T, M extends Method>(
     method: M,
     ...params: FetchParams<T, ErrorData>
-  ): Promise<{ data: T; isError: false } | { data: null; isError: true }> => {
+  ): Promise<Response<T, ErrorData>> => {
     const [url, config, options] = params;
 
     const finalUrl = options?.useFullUrl
       ? url
       : `${removeSlash(baseUrl)}/${removeSlash(url)}`;
 
-    const token = await getToken();
+    console.log({ finalUrl });
 
-    if (!token) console.log("[API] api call with no token");
+    const tokenHeader = await tokenHeaderFn();
+    console.log(tokenHeader);
 
+    if (!tokenHeader) console.log('[API] api call with no token');
+
+    console.log({ tokenHeader });
     const headers = {
-      "Content-Type": "application/json",
-      ...(token ? tokenHandler(token) : {}),
+      'Content-Type': 'application/json',
+      ...(tokenHeader || {}),
       ...(config?.headers || {}),
     };
 
     if (config?.isMultipartFormData) {
-      delete (headers as any)["Content-Type"];
+      delete (headers as any)['Content-Type'];
     }
 
     const body = config?.body
@@ -57,8 +59,8 @@ export const returnFetch = <ErrorData>({
     try {
       console.log(
         `[${method}] ${options?.dummyUrl || finalUrl} ${JSON.stringify(
-          config?.body || ""
-        )} ${options?.dummyData ? "WITH DUMMY DATA" : ""}`,
+          config?.body || ''
+        )} ${options?.dummyData ? 'WITH DUMMY DATA' : ''}`,
         { configData }
       );
 
@@ -71,24 +73,35 @@ export const returnFetch = <ErrorData>({
 
       const data = await res.json();
 
-      // TOOD: 이후 삭제
-      if ("code" in data && "message" in data && "value" in data) {
-        throw new Error(data.message);
+      if (res.ok) {
+        return { data: data as T, isError: false };
+      } else {
+        console.log('[API] error but expected!');
+        return {
+          isError: true,
+          isExpectedError: true,
+          error: data as ErrorData,
+          status: res.status,
+        };
       }
-
-      return { data: data as T, isError: false };
     } catch (e) {
-      console.error(e);
-      const _onError = options?.onError || onError;
-      _onError(options?.error || (e as ErrorData));
-      return { data: null, isError: true };
+      console.log('[API] unexpected error!');
+      return { isError: true, isExpectedError: false };
     }
   };
 
-  const createMethod =
-    <M extends Method>(method: M) =>
-    <T>(...params: FetchParams<T, ErrorData>) =>
-      fetchFn<T, M>(method, ...params);
+  const createMethod = <M extends Method>(method: M) => {
+    return async <T>(...params: FetchParams<T, ErrorData>) => {
+      const res = await fetchFn<T, M>(method, ...params);
+      if (res?.status === 401) {
+        console.log('[API] unauthorized error. trying to retry after handler');
+        await onUnauthorizedError();
+        return await fetchFn<T, M>(method, ...params);
+      } else {
+        return res;
+      }
+    };
+  };
 
   return {
     get: createMethod(Method.GET),
@@ -116,3 +129,26 @@ type FetchConfig = {
   body?: any;
   isMultipartFormData?: boolean;
 };
+
+type Response<T, ErrorData> =
+  | {
+      isError: false;
+      data: T;
+      isExpectedError?: undefined;
+      status?: undefined;
+      error?: undefined;
+    }
+  | {
+      isError: true;
+      data?: undefined;
+      isExpectedError: true;
+      status: number;
+      error: ErrorData;
+    }
+  | {
+      isError: true;
+      data?: undefined;
+      isExpectedError: false;
+      status?: undefined;
+      error?: ErrorData;
+    };
