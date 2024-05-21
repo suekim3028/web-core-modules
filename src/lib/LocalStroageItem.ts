@@ -6,6 +6,10 @@ export class LocalStorageItem<T> {
   }
 
   public get() {
+    if (typeof window === 'undefined') {
+      console.log('no window');
+      return null;
+    }
     const item = localStorage.getItem(this.key);
     if (!item) return null;
 
@@ -20,7 +24,10 @@ export class LocalStorageItem<T> {
   }
 
   public set(data: Partial<T>) {
-    if (!data) return;
+    if (typeof window === 'undefined' || !data) {
+      console.log('no window');
+      return;
+    }
 
     try {
       localStorage.setItem(this.key, JSON.stringify(data));
@@ -30,6 +37,7 @@ export class LocalStorageItem<T> {
   }
 
   public remove() {
+    if (typeof window === 'undefined') return;
     localStorage.removeItem(this.key);
   }
 }
