@@ -103,6 +103,7 @@ const ButtonComponent = <
   textColor,
   disabled,
   onClick,
+  iconSize: _iconSize,
   generatorProps: {
     sizeSettings,
     typeSettings,
@@ -156,10 +157,10 @@ const ButtonComponent = <
     >
       {!!icon && (
         <div style={{ marginRight: iconMr }}>
-          {renderIcon({ name: icon, size: iconSize })}
+          {renderIcon({ name: icon, size: _iconSize || iconSize })}
         </div>
       )}
-      <Flex minH={iconSize} alignItems={"center"}>
+      <Flex minH={_iconSize || iconSize} alignItems={"center"}>
         {renderText({
           type: fontType,
           color:
@@ -187,6 +188,7 @@ type ButtonProps<T extends ReadOnlyProperties> = {
     bgRgbColor?: string;
     textColor?: keyof T["colorSettings"];
     textRgbColor?: string;
+    iconSize?: number;
   } & (
     | {
         href?: undefined;
