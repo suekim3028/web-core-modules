@@ -1,4 +1,4 @@
-import { jsUtils } from '.';
+import { jsUtils } from ".";
 
 /**
  * 원하는 초만큼 기다리도록 하는 함수
@@ -17,13 +17,13 @@ export const wait = (seconds: number) => {
  */
 
 export const parseNum = (str: string) => {
-  if (str === '') return null;
+  if (str === "") return null;
 
-  const replaced = str.replace(/[^0-9+.]/g, '');
+  const replaced = str.replace(/[^0-9+.]/g, "");
   if (!replaced) return null;
   const parsed = Number(replaced);
 
-  if (typeof parsed !== 'number' || Number.isNaN(parsed)) return null;
+  if (typeof parsed !== "number" || Number.isNaN(parsed)) return null;
 
   return parsed;
 };
@@ -41,16 +41,16 @@ export const getRandomArrItem = (arr: any[]) => {
  * image resize 함수
  */
 
-type ResultType = 'dataURL' | 'Blob';
+type ResultType = "dataURL" | "Blob";
 
 export const resizeImage = async <T extends ResultType>(
   image: HTMLImageElement,
   maxSize: number,
   resultType: T,
   type?: string
-): Promise<(T extends 'dataURL' ? string : Blob) | null> => {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
+): Promise<(T extends "dataURL" ? string : Blob) | null> => {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
   if (!ctx) return null;
 
   const horizontal = image.width >= image.height;
@@ -74,24 +74,24 @@ export const resizeImage = async <T extends ResultType>(
   const blob = await promise;
   const url = canvas.toDataURL(type);
   canvas.remove();
-  if (resultType === 'dataURL') {
-    return url as T extends 'dataURL' ? string : Blob;
+  if (resultType === "dataURL") {
+    return url as T extends "dataURL" ? string : Blob;
   } else {
-    return blob as T extends 'dataURL' ? string : Blob;
+    return blob as T extends "dataURL" ? string : Blob;
   }
 };
 
 export const fileToImage = async (file: File) => {
   const fileReader = new FileReader();
 
-  const tempImageElement = document.createElement('img');
+  const tempImageElement = document.createElement("img");
   let resolver: ((imageUrl: string) => void) | null = null;
   const promise = new Promise((r: (imageUrl: string) => void) => {
     resolver = r;
   });
   fileReader.onload = (ev) => {
     const result = ev.target?.result;
-    if (typeof result === 'string' && !!resolver) {
+    if (typeof result === "string" && !!resolver) {
       resolver(result);
     } else {
       throw new Error();
@@ -114,18 +114,18 @@ export const downloadImages = (
 
   const shareData: ShareData = {
     files,
-    title: '독수리사진관 프로필이미지',
+    title: "독수리 사진관 프로필이미지",
   };
 
   if (
-    'canShare' in navigator &&
-    'share' in navigator &&
+    "canShare" in navigator &&
+    "share" in navigator &&
     navigator.canShare(shareData)
   ) {
     navigator.share(shareData);
   } else {
     imageUrls.forEach(async (imageUrl, idx) => {
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = imageUrl;
       a.download = imageUrl;
       a.click();
