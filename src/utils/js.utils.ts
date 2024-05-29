@@ -117,21 +117,25 @@ export const downloadImages = (
     title: "독수리 사진관 프로필이미지",
   };
 
-  if (
-    "canShare" in navigator &&
-    "share" in navigator &&
-    navigator.canShare(shareData)
-  ) {
-    navigator.share(shareData);
-  } else {
-    imageUrls.forEach(async (imageUrl, idx) => {
-      const a = document.createElement("a");
-      a.href = imageUrl;
-      a.download = imageUrl;
-      a.click();
-      await jsUtils.wait(0.5);
-      console.log(idx);
-      a.remove();
-    });
+  try {
+    if (
+      "canShare" in navigator &&
+      "share" in navigator &&
+      navigator.canShare(shareData)
+    ) {
+      navigator.share(shareData);
+    } else {
+      imageUrls.forEach(async (imageUrl, idx) => {
+        const a = document.createElement("a");
+        a.href = imageUrl;
+        a.download = imageUrl;
+        a.click();
+        await jsUtils.wait(0.5);
+        console.log(idx);
+        a.remove();
+      });
+    }
+  } catch (e) {
+    //
   }
 };
