@@ -1,10 +1,10 @@
-const removeSlash = (url: string) => (url.startsWith('/') ? url.slice(1) : url);
+const removeSlash = (url: string) => (url.startsWith("/") ? url.slice(1) : url);
 enum Method {
-  'GET' = 'GET',
-  'PUT' = 'PUT',
-  'POST' = 'POST',
-  'DELETE' = 'DELETE',
-  'PATCH' = 'PATCH',
+  "GET" = "GET",
+  "PUT" = "PUT",
+  "POST" = "POST",
+  "DELETE" = "DELETE",
+  "PATCH" = "PATCH",
 }
 
 export const returnFetch = <ErrorData>({
@@ -31,17 +31,17 @@ export const returnFetch = <ErrorData>({
     const tokenHeader = await tokenHeaderFn();
     console.log(tokenHeader);
 
-    if (!tokenHeader) console.log('[API] api call with no token');
+    if (!tokenHeader) console.log("[API] api call with no token");
 
     console.log({ tokenHeader });
     const headers = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(tokenHeader || {}),
       ...(config?.headers || {}),
     };
 
     if (config?.isMultipartFormData) {
-      delete (headers as any)['Content-Type'];
+      delete (headers as any)["Content-Type"];
     }
 
     const body = config?.body
@@ -59,8 +59,8 @@ export const returnFetch = <ErrorData>({
     try {
       console.log(
         `[${method}] ${options?.dummyUrl || finalUrl} ${JSON.stringify(
-          config?.body || ''
-        )} ${options?.dummyData ? 'WITH DUMMY DATA' : ''}`,
+          config?.body || ""
+        )} ${options?.dummyData ? "WITH DUMMY DATA" : ""}`,
         { configData }
       );
 
@@ -69,14 +69,18 @@ export const returnFetch = <ErrorData>({
 
       const res = await fetch(options?.dummyUrl || finalUrl, configData);
 
+      console.log({ status: res.status });
+
       if (res.status == 201) return { data: undefined as T, isError: false };
 
       const data = await res.json();
 
+      console.log({ data, ok: res.ok });
+
       if (res.ok) {
         return { data: data as T, isError: false };
       } else {
-        console.log('[API] error but expected!');
+        console.log("[API] error but expected!");
         return {
           isError: true,
           isExpectedError: true,
@@ -85,7 +89,7 @@ export const returnFetch = <ErrorData>({
         };
       }
     } catch (e) {
-      console.log('[API] unexpected error!');
+      console.log("[API] unexpected error!");
       return { isError: true, isExpectedError: false };
     }
   };
@@ -94,7 +98,7 @@ export const returnFetch = <ErrorData>({
     return async <T>(...params: FetchParams<T, ErrorData>) => {
       const res = await fetchFn<T, M>(method, ...params);
       if (res?.status === 401) {
-        console.log('[API] unauthorized error. trying to retry after handler');
+        console.log("[API] unauthorized error. trying to retry after handler");
         await onUnauthorizedError();
         return await fetchFn<T, M>(method, ...params);
       } else {
