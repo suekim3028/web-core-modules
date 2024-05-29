@@ -61,18 +61,27 @@ export const resizeImage = async <T extends ResultType>(
   canvas.width = width;
   canvas.height = height;
 
+  console.log("---");
   ctx.drawImage(image, 0, 0, width, height);
+  console.log("---drawimage");
 
   let resolver: ((blob: Blob | null) => void) | null = null;
   const promise = new Promise((r: (blob: Blob | null) => void) => {
     resolver = r;
   });
   canvas.toBlob((b) => {
+    console.log("---blob");
+    console.log(b);
+
     if (resolver) resolver(b);
   });
 
   const blob = await promise;
-  const url = canvas.toDataURL(type);
+  console.log("---hasblob", blob);
+
+  if (!blob) return null;
+  const url = window.URL.createObjectURL(blob);
+  console.log("---url", !!url);
   canvas.remove();
   if (resultType === "dataURL") {
     return url as T extends "dataURL" ? string : Blob;
@@ -82,26 +91,56 @@ export const resizeImage = async <T extends ResultType>(
 };
 
 export const fileToImage = async (file: File) => {
-  const fileReader = new FileReader();
+  const image = document.createElement("img");
+  image.crossOrigin = "anonymous";
 
-  const tempImageElement = document.createElement("img");
-  let resolver: ((imageUrl: string) => void) | null = null;
-  const promise = new Promise((r: (imageUrl: string) => void) => {
+  const imageUrl = window.URL.createObjectURL(file);
+  console.log({ imageUrl });
+  image.src = imageUrl;
+  return image;
+};
+
+export const resizeFile = async (file: File, maxSize: number) => {
+  const image = document.createElement("img");
+  image.crossOrigin = "anonymous";
+
+  const imageUrl = window.URL.createObjectURL(file);
+
+  let resolver: ((blob: Blob | null) => void) | null = null;
+
+  const promise = new Promise((r: (blob: Blob | null) => void) => {
     resolver = r;
   });
-  fileReader.onload = (ev) => {
-    const result = ev.target?.result;
-    if (typeof result === "string" && !!resolver) {
-      resolver(result);
-    } else {
-      throw new Error();
-    }
+
+  image.onload = async () => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+
+    const horizontal = image.width >= image.height;
+
+    const width = horizontal ? maxSize : maxSize * (image.width / image.height); // destination canvas size
+    const height = horizontal
+      ? maxSize * (image.height / image.width)
+      : maxSize; // destination canvas size
+
+    canvas.width = width;
+    canvas.height = height;
+
+    console.log("---");
+    ctx.drawImage(image, 0, 0, width, height);
+    console.log("---drawimage");
+
+    canvas.toBlob((b) => {
+      console.log("---blob");
+      if (!b) return null;
+      if (resolver) resolver(b);
+    });
   };
 
-  fileReader.readAsDataURL(file);
-  const imageUrl = await promise;
-  tempImageElement.src = imageUrl;
-  return tempImageElement;
+  image.src = imageUrl;
+  const blob = await promise;
+  return blob;
 };
 
 export const downloadImages = (
