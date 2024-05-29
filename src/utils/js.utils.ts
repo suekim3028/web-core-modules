@@ -153,7 +153,7 @@ export const downloadImages = (
 
   const shareData: ShareData = {
     files,
-    title: "독수리 사진관 프로필이미지",
+    title: `자, 여기 내 아카라카 AI 프로필🦅💙\n너도 만들래? 👉 ${process.env.NEXT_PUBLIC_SHARE_WEB_URL}`,
   };
 
   try {
