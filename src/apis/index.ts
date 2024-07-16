@@ -1,3 +1,5 @@
+import { jsUtils } from "../utils";
+
 const removeSlash = (url: string) => (url.startsWith("/") ? url.slice(1) : url);
 enum Method {
   "GET" = "GET",
@@ -15,6 +17,7 @@ export const returnFetch = <ErrorData>({
   baseUrl: string;
   tokenHeaderFn: () => Promise<Record<string, string> | null>;
   onUnauthorizedError: () => Promise<void>;
+  onError?: () => void;
 }) => {
   const fetchFn = async <T, M extends Method>(
     method: M,
@@ -64,8 +67,10 @@ export const returnFetch = <ErrorData>({
         { configData }
       );
 
-      if (options?.dummyData)
+      if (options?.dummyData) {
+        jsUtils.wait(1);
         return { isError: false, data: options.dummyData };
+      }
 
       const res = await fetch(options?.dummyUrl || finalUrl, configData);
 

@@ -1,9 +1,4 @@
-import {
-  Flex as FlexComponent,
-  FlexProps,
-  GridItem,
-  GridItemProps,
-} from "@chakra-ui/react";
+import { Flex as FlexComponent, FlexProps } from "@chakra-ui/react";
 import React, { forwardRef } from "react";
 
 const FlexComponentGenerator = <
@@ -14,17 +9,14 @@ const FlexComponentGenerator = <
 ) => {
   const Component = forwardRef<
     HTMLDivElement,
-    FlexProps &
-      GridItemProps & { bgColor?: S; bgRgbColor?: string; isGridItem?: boolean }
-  >(({ bgColor, bgRgbColor, isGridItem, ...props }, ref) => {
-    return isGridItem ? (
-      <GridItem
-        display={"flex"}
-        ref={ref}
-        {...props}
-        bgColor={bgColor ? colorGenerator[bgColor] : bgRgbColor}
-      />
-    ) : (
+    FlexProps & {
+      bgColor?: S;
+      bgRgbColor?: string;
+      // borderColor?: S | undefined;
+      // borderRgbColor?: string;
+    }
+  >(({ bgColor, bgRgbColor, ...props }, ref) => {
+    return (
       <FlexComponent
         ref={ref}
         {...props}
