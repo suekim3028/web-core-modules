@@ -1,3 +1,3 @@
+import ErrorBoundary from "./ErrorBoundary";
 import ModalWrapper from "./ModalWrapper/ModalWrapper";
-
-export { ModalWrapper };
+export { ErrorBoundary, ModalWrapper };
