@@ -67,8 +67,10 @@ export const returnFetch = <ErrorData>({
         { configData }
       );
 
-      if (options?.dummyData) {
-        jsUtils.wait(1);
+      if (options?.dummyData && options?.useDummy !== false) {
+        await jsUtils.wait(
+          options?.dummyWaitSecs === undefined ? 1 : options.dummyWaitSecs
+        );
         return { isError: false, data: options.dummyData };
       }
 
@@ -130,6 +132,8 @@ type FetchParams<T, ErrorData> = [
     error?: ErrorData;
     dummyUrl?: string;
     useFullUrl?: boolean;
+    useDummy?: boolean;
+    dummyWaitSecs?: number;
   }
 ];
 
