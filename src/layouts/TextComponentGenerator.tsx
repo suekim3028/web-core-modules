@@ -30,7 +30,7 @@ export function TextComponentGenerator<
         {...factory[type]}
         {...props}
         // margin={0}
-
+        wordBreak={"break-all"}
         whiteSpace={"pre-line"}
         color={
           color && color in colorGenerator

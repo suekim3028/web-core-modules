@@ -13,7 +13,7 @@ export const useSecondEffect = (
       started.current = true;
 
       const numbers = interval(1000);
-      numbers.pipe(take(seconds)).subscribe(effect);
+      const sub = numbers.pipe(take(seconds)).subscribe(effect);
     }
   }, []);
 };

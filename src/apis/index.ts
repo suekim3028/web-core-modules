@@ -63,7 +63,11 @@ export const returnFetch = <ErrorData>({
       console.log(
         `[${method}] ${options?.dummyUrl || finalUrl} ${JSON.stringify(
           config?.body || ""
-        )} ${options?.dummyData ? "WITH DUMMY DATA" : ""}`,
+        )} ${
+          options?.dummyData && options?.useDummy !== false
+            ? "WITH DUMMY DATA"
+            : ""
+        }`,
         { configData }
       );
 
@@ -77,8 +81,6 @@ export const returnFetch = <ErrorData>({
       const res = await fetch(options?.dummyUrl || finalUrl, configData);
 
       console.log({ status: res.status });
-
-      if (res.status == 201) return { data: undefined as T, isError: false };
 
       const data = await res.json();
 
