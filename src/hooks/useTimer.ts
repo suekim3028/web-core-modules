@@ -27,3 +27,14 @@ export const useEverySecondEffect = (effect: (now: Date) => void) => {
     };
   }, [effect]);
 };
+
+export const useEveryMinuteEffect = (effect: (now: Date) => void) => {
+  useEffect(() => {
+    const source = interval(1000 * 60);
+    const subscribe = source.subscribe(() => effect(new Date()));
+
+    return () => {
+      subscribe.unsubscribe();
+    };
+  }, [effect]);
+};
