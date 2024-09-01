@@ -82,7 +82,7 @@ export const returnFetch = <ErrorData>({
 
       console.log({ status: res.status });
 
-      const data = res.status === 200 ? await res.json() : res.body;
+      const data = await res.json();
 
       console.log({ data, ok: res.ok });
 
