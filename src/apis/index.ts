@@ -13,6 +13,7 @@ export const returnFetch = <ErrorData>({
   baseUrl,
   tokenHeaderFn,
   onUnauthorizedError,
+  onError,
 }: {
   baseUrl: string;
   tokenHeaderFn: () => Promise<Record<string, string> | null>;
@@ -90,6 +91,7 @@ export const returnFetch = <ErrorData>({
         return { data: data as T, isError: false };
       } else {
         console.log("[API] error but expected!");
+        if (onError) onError();
         return {
           isError: true,
           isExpectedError: true,
@@ -99,6 +101,8 @@ export const returnFetch = <ErrorData>({
       }
     } catch (e) {
       console.log("[API] unexpected error!");
+      if (onError) onError();
+
       return { isError: true, isExpectedError: false };
     }
   };

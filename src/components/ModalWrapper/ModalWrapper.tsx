@@ -27,22 +27,20 @@ const ModalWrapper = ({ children }: { children: React.ReactNode }) => {
       {!!modalItem && (
         <Flex
           onClick={modalItem.closeOnDim ? close : undefined}
-          w="100%"
-          h="100%"
-          position={"absolute"}
+          position={"fixed"}
           left={0}
           right={0}
           top={0}
           bottom={0}
-          justifyContent={"center"}
-          alignItems={modalItem.position === "bottom" ? "flex-end" : "center"}
           bgColor={"rgba(0,0,0,0.5)"}
           zIndex={10}
+          justifyContent={"center"}
+          alignItems={modalItem.position === "bottom" ? "flex-end" : "center"}
         >
           <Flex
-            w="100%"
             onClick={(e) => {
               e.stopPropagation();
+              e.preventDefault();
             }}
           >
             {modalItem.Component}
