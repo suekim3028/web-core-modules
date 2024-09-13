@@ -30,14 +30,10 @@ export const returnFetch = <ErrorData>({
       ? url
       : `${removeSlash(baseUrl)}/${removeSlash(url)}`;
 
-    console.log({ finalUrl });
-
     const tokenHeader = await tokenHeaderFn();
-    console.log(tokenHeader);
 
     if (!tokenHeader) console.log("[API] api call with no token");
 
-    console.log({ tokenHeader });
     const headers = {
       "Content-Type": "application/json",
       ...(tokenHeader || {}),
@@ -61,17 +57,6 @@ export const returnFetch = <ErrorData>({
     };
 
     try {
-      console.log(
-        `[${method}] ${options?.dummyUrl || finalUrl} ${JSON.stringify(
-          config?.body || ""
-        )} ${
-          options?.dummyData && options?.useDummy !== false
-            ? "WITH DUMMY DATA"
-            : ""
-        }`,
-        { configData }
-      );
-
       if (options?.dummyData && options?.useDummy !== false) {
         await jsUtils.wait(
           options?.dummyWaitSecs === undefined ? 1 : options.dummyWaitSecs
@@ -81,16 +66,31 @@ export const returnFetch = <ErrorData>({
 
       const res = await fetch(options?.dummyUrl || finalUrl, configData);
 
-      console.log({ status: res.status });
-
       const data = await res.json();
 
-      console.log({ data, ok: res.ok });
-
       if (res.ok) {
+        console.log(
+          `🫶 [${method}] ${options?.dummyUrl || finalUrl} ${JSON.stringify(
+            config?.body || ""
+          )} ${
+            options?.dummyData && options?.useDummy !== false
+              ? "WITH DUMMY DATA"
+              : ""
+          }`
+        );
+
         return { data: data as T, isError: false };
       } else {
-        console.log("[API] error but expected!");
+        console.log(
+          `❗️ [${method}] ${options?.dummyUrl || finalUrl} ${JSON.stringify(
+            config?.body || ""
+          )} ${
+            options?.dummyData && options?.useDummy !== false
+              ? "WITH DUMMY DATA"
+              : ""
+          }`
+        );
+
         if (onError) onError();
         return {
           isError: true,
@@ -100,7 +100,15 @@ export const returnFetch = <ErrorData>({
         };
       }
     } catch (e) {
-      console.log("[API] unexpected error!");
+      console.log(
+        `❗️ [${method}] ${options?.dummyUrl || finalUrl} ${JSON.stringify(
+          config?.body || ""
+        )} ${
+          options?.dummyData && options?.useDummy !== false
+            ? "WITH DUMMY DATA"
+            : ""
+        }`
+      );
       if (onError) onError();
 
       return { isError: true, isExpectedError: false };
