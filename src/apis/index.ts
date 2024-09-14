@@ -70,7 +70,7 @@ export const returnFetch = <ErrorData>({
 
       if (res.ok) {
         console.log(
-          `🫶 [${method}] ${options?.dummyUrl || finalUrl} ${JSON.stringify(
+          `🫶 [${method}] ${removeSlash(url)} ${JSON.stringify(
             config?.body || ""
           )} ${
             options?.dummyData && options?.useDummy !== false
@@ -82,9 +82,9 @@ export const returnFetch = <ErrorData>({
         return { data: data as T, isError: false };
       } else {
         console.log(
-          `❗️ [${method}] ${options?.dummyUrl || finalUrl} ${JSON.stringify(
-            config?.body || ""
-          )} ${
+          `❗️ [${method}] ${removeSlash(url)} ${
+            JSON.stringify(config?.body || "") || ""
+          } ${
             options?.dummyData && options?.useDummy !== false
               ? "WITH DUMMY DATA"
               : ""
