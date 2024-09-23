@@ -66,8 +66,6 @@ export const returnFetch = <ErrorData>({
 
       const res = await fetch(options?.dummyUrl || finalUrl, configData);
 
-      const data = await res.json();
-
       if (res.ok) {
         console.log(
           `🫶 [${method}] ${removeSlash(url)} ${JSON.stringify(
@@ -78,8 +76,14 @@ export const returnFetch = <ErrorData>({
               : ""
           }`
         );
-
-        return { data: data as T, isError: false };
+        console.log("====", res.body);
+        let data: T;
+        try {
+          data = await res.json();
+        } catch (e) {
+          data = undefined as T;
+        }
+        return { data, isError: false };
       } else {
         console.log(
           `❗️ [${method}] ${removeSlash(url)} ${
@@ -91,11 +95,18 @@ export const returnFetch = <ErrorData>({
           }`
         );
 
+        let data: ErrorData;
+        try {
+          data = await res.json();
+        } catch (e) {
+          data = undefined as ErrorData;
+        }
+
         if (onError) onError();
         return {
           isError: true,
           isExpectedError: true,
-          error: data as ErrorData,
+          error: data,
           status: res.status,
         };
       }
