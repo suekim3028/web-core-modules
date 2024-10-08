@@ -13,13 +13,26 @@ export type ErrorState =
       errorMsg?: undefined;
     };
 
+export type ValidationFn = <T extends Object, K extends keyof T>(
+  value: T[K] | undefined
+) => ErrorState;
+
+const booleanValidationFn = (value: any): ErrorState => ({
+  isEmpty: !value,
+  isError: !value,
+});
+
 const useFormItem = <T extends Object, K extends keyof T>({
-  onChangeItemError,
-  onChangeItemValue,
-  defaultValue,
+  link: {
+    onChangeItemError,
+    onChangeItemValue,
+    defaultValue,
+    addValueChangeListenerByKey,
+  },
   validateFn,
-}: FormItemElementProps<T, K> & {
-  validateFn: (value: T[K] | undefined) => ErrorState;
+}: {
+  link: FormItemElementProps<T, K>;
+  validateFn: ValidationFn | "boolean";
 }) => {
   const [errorState, setErrorState] = useState<ErrorState>({
     isError: false,
@@ -28,7 +41,10 @@ const useFormItem = <T extends Object, K extends keyof T>({
 
   const valueChangeHandler = useCallback(
     (value: T[K] | undefined) => {
-      const validationRes = validateFn(value);
+      const validationRes =
+        validateFn === "boolean"
+          ? booleanValidationFn(value)
+          : validateFn(value);
 
       setErrorState(validationRes);
       onChangeItemError(validationRes.isError);
@@ -41,7 +57,7 @@ const useFormItem = <T extends Object, K extends keyof T>({
     valueChangeHandler(defaultValue);
   }, [defaultValue, valueChangeHandler]);
 
-  return { valueChangeHandler, errorState };
+  return { valueChangeHandler, errorState, addValueChangeListenerByKey };
 };
 
 export default useFormItem;

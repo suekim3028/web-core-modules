@@ -39,8 +39,6 @@ const Example = () => {
 };
 
 const NameForm: FormItemElement<SignUpValue, "name"> = (link) => {
-  console.log(`이름 아이템 RERENDER`);
-
   const validateName = useCallback((value: string | undefined): ErrorState => {
     if (value !== "이름")
       return {
@@ -168,7 +166,10 @@ const PrivacyForm: FormItemElement<SignUpValue, "isPrivacyAgreed"> = (link) => {
   );
 };
 
-const SubmitButton: FormSubmitElement = ({ isSubmittable }) => {
+const SubmitButton: FormSubmitElement = ({
+  isSubmittable,
+  getCurrentValue,
+}) => {
   return (
     <Button
       isDisabled={!isSubmittable}
@@ -176,6 +177,7 @@ const SubmitButton: FormSubmitElement = ({ isSubmittable }) => {
       mt={"20px"}
       width={"100px"}
       height={"40px"}
+      onClick={() => alert(getCurrentValue())}
     >
       회원가입
     </Button>
