@@ -1,3 +1,4 @@
+"use client";
 import { ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import { tsUtils } from "../../utils";
 import { createFormHooks, FormContextValue } from "./createFormHooks";
@@ -21,13 +22,19 @@ class FormFactory<T extends Object> {
       tsUtils.fromEntries(tsUtils.getKeys(defaultValue).map((k) => [k, false]))
     );
 
+    console.log("form 전체 rerender");
+
     const onChangeItemError = useCallback((key: keyof T, isError: boolean) => {
       errorState.current = { ...errorState.current, [key]: isError };
-      setIsSubmittable(Object.values(errorState.current).every(Boolean));
+      console.log("ERROR STATE:", errorState.current);
+      setIsSubmittable(
+        Object.values(errorState.current).every((v) => !Boolean(v))
+      );
     }, []);
 
     const onChangeItemValue = useCallback(
       <K extends keyof T>(key: K, value: T[K] | undefined) => {
+        console.log("===", { ...currentValue.current, [key]: value });
         currentValue.current = { ...currentValue.current, [key]: value };
       },
       []
@@ -49,10 +56,10 @@ class FormFactory<T extends Object> {
   };
 
   public FormItem = <K extends keyof T>({
-    key,
+    formKey,
     render,
   }: {
-    key: K;
+    formKey: K;
     render: FormItemElement<T, K>;
   }) => {
     const {
@@ -63,21 +70,21 @@ class FormFactory<T extends Object> {
 
     const onChangeItemError = useCallback(
       (isError: boolean) => {
-        return _onChangeItemError(key, isError);
+        return _onChangeItemError(formKey, isError);
       },
-      [_onChangeItemError, key]
+      [_onChangeItemError, formKey]
     );
 
     const onChangeItemValue = useCallback(
       (value: T[K] | undefined) => {
-        return _onChangeItemValue(key, value);
+        return _onChangeItemValue(formKey, value);
       },
-      [_onChangeItemValue, key]
+      [_onChangeItemValue, formKey]
     );
 
     const defaultValue = useMemo(
-      () => _defaultValue[key],
-      [_defaultValue, key]
+      () => _defaultValue[formKey],
+      [_defaultValue, formKey]
     );
     return render({ onChangeItemError, onChangeItemValue, defaultValue });
   };
