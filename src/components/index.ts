@@ -1,2 +1,2 @@
-import ModalWrapper from "./ModalWrapper/ModalWrapper";
-export { ModalWrapper };
+export { default as FormFactory } from "./Form/FormFactory";
+export { default as ModalWrapper } from "./ModalWrapper/ModalWrapper";
