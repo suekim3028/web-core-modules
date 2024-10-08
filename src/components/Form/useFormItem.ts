@@ -1,26 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+"use client";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormItemElementProps } from "./FormFactory";
-
-export type ErrorState =
-  | {
-      isError: true;
-      isEmpty: boolean;
-      errorMsg?: string;
-    }
-  | {
-      isError: false;
-      isEmpty: boolean;
-      errorMsg?: undefined;
-    };
-
-export type ValidationFn = <T extends Object, K extends keyof T>(
-  value: T[K] | undefined
-) => ErrorState;
-
-const booleanValidationFn = (value: any): ErrorState => ({
-  isEmpty: !value,
-  isError: !value,
-});
+import { ErrorState, ValidationFn } from "./types";
 
 const useFormItem = <T extends Object, K extends keyof T>({
   link: {
@@ -29,22 +10,33 @@ const useFormItem = <T extends Object, K extends keyof T>({
     defaultValue,
     addValueChangeListenerByKey,
   },
-  validateFn,
+  validateFn: _validateFn,
 }: {
   link: FormItemElementProps<T, K>;
-  validateFn: ValidationFn | "boolean";
+  validateFn: ValidationFn | "boolean" | "always";
 }) => {
   const [errorState, setErrorState] = useState<ErrorState>({
     isError: false,
     isEmpty: false,
   });
 
+  const validateFn = useMemo((): ValidationFn => {
+    switch (_validateFn) {
+      case "always":
+        return (value) => ({ isEmpty: !!value, isError: false });
+      case "boolean":
+        return (value: any): ErrorState => ({
+          isEmpty: !value,
+          isError: !value,
+        });
+      default:
+        return _validateFn;
+    }
+  }, [_validateFn]);
+
   const valueChangeHandler = useCallback(
     (value: T[K] | undefined) => {
-      const validationRes =
-        validateFn === "boolean"
-          ? booleanValidationFn(value)
-          : validateFn(value);
+      const validationRes = validateFn(value);
 
       setErrorState(validationRes);
       onChangeItemError(validationRes.isError);

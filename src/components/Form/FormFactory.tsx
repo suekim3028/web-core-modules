@@ -2,7 +2,8 @@
 import { ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import { Subject } from "rxjs";
 import { tsUtils } from "../../utils";
-import { createFormHooks, FormContextValue, WIPValue } from "./createFormHooks";
+import { createFormHooks } from "./createFormHooks";
+import { FormContextValue, WIPValue } from "./types";
 
 // 타입을 내려보내기 위해서 class로 감싸서 provider랑 render 만듦
 class FormFactory<T extends Object> {
@@ -30,7 +31,7 @@ class FormFactory<T extends Object> {
     );
 
     // 다른 form item의 value change에 대한 listener
-    const listeners = useRef(
+    const listener = useRef(
       (<K extends keyof T>() =>
         new Subject<{ key: K; value: WIPValue<T>[K] }>())()
     );
@@ -39,7 +40,7 @@ class FormFactory<T extends Object> {
       formKey: K,
       cb: (v: WIPValue<T>[K]) => void
     ) => {
-      return listeners.current.subscribe(({ key, value }) => {
+      return listener.current.subscribe(({ key, value }) => {
         if (key !== formKey) return;
         cb(value as WIPValue<T>[K]);
       });
@@ -55,7 +56,7 @@ class FormFactory<T extends Object> {
 
     const onChangeItemValue = useCallback(
       <K extends keyof T>(key: K, value: T[K] | undefined) => {
-        listeners.current.next({ key, value });
+        listener.current.next({ key, value });
         currentValue.current = { ...currentValue.current, [key]: value };
       },
       []
@@ -130,7 +131,7 @@ class FormFactory<T extends Object> {
   };
 
   // Submit 컴포넌트
-  public Submit = ({ render }: { render: FormSubmitElement }) => {
+  public Submit = ({ render }: { render: FormSubmitElement<T> }) => {
     const { isSubmittable, getCurrentValue } = this.formHooks.useFormContext();
     return render({ isSubmittable, getCurrentValue });
   };
@@ -146,7 +147,7 @@ export type FormItemElement<T extends Object, K extends keyof T> = (
   props: FormItemElementProps<T, K>
 ) => JSX.Element;
 
-export type FormSubmitElement = <T extends Object>(
+export type FormSubmitElement<T extends Object> = (
   props: Pick<FormContextValue<T>, "isSubmittable" | "getCurrentValue">
 ) => JSX.Element;
 export default FormFactory;
