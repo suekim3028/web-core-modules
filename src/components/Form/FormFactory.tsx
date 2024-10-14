@@ -36,15 +36,15 @@ class FormFactory<T extends Object> {
         new Subject<{ key: K; value: WIPValue<T>[K] }>())()
     );
 
-    const addValueChangeListenerByKey = <K extends keyof T>(
-      formKey: K,
-      cb: (v: WIPValue<T>[K]) => void
-    ) => {
-      return listener.current.subscribe(({ key, value }) => {
-        if (key !== formKey) return;
-        cb(value as WIPValue<T>[K]);
-      });
-    };
+    const addValueChangeListenerByKey = useCallback(
+      <K extends keyof T>(formKey: K, cb: (v: WIPValue<T>[K]) => void) => {
+        return listener.current.subscribe(({ key, value }) => {
+          if (key !== formKey) return;
+          cb(value as WIPValue<T>[K]);
+        });
+      },
+      []
+    );
 
     const onChangeItemError = useCallback((key: keyof T, isError: boolean) => {
       errorState.current = { ...errorState.current, [key]: isError };
