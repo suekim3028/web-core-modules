@@ -1,2 +1,3 @@
-import ModalWrapper from "./ModalWrapper/ModalWrapper";
-export { ModalWrapper };
+export * as Form from "./Form";
+
+export { default as ModalWrapper } from "./ModalWrapper/ModalWrapper";
